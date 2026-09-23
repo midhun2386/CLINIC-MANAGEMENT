@@ -22,6 +22,19 @@ class User(db.Model):
     patients_registered = db.relationship('Patient', backref='registered_by_user', lazy=True)
     treatment_entries_created = db.relationship('TreatmentEntry', backref='created_by_user', lazy=True)
 
+    def __init__(self, name=None, email=None, password_hash=None, role=None, is_active=True, **kwargs):
+        super().__init__(**kwargs)
+        if name is not None:
+            self.name = name
+        if email is not None:
+            self.email = email
+        if password_hash is not None:
+            self.password_hash = password_hash
+        if role is not None:
+            self.role = role
+        if is_active is not None:
+            self.is_active = is_active
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -52,6 +65,28 @@ class Patient(db.Model):
     # Relationships
     treatment_entries = db.relationship('TreatmentEntry', backref='patient', lazy=True,
                                         cascade='all, delete-orphan')
+
+    def __init__(self, name=None, dob=None, gender=None, phone=None, photo_url=None, email=None,
+                 additional_phone=None, address=None, registered_by=None, **kwargs):
+        super().__init__(**kwargs)
+        if name is not None:
+            self.name = name
+        if dob is not None:
+            self.dob = dob
+        if gender is not None:
+            self.gender = gender
+        if phone is not None:
+            self.phone = phone
+        if photo_url is not None:
+            self.photo_url = photo_url
+        if email is not None:
+            self.email = email
+        if additional_phone is not None:
+            self.additional_phone = additional_phone
+        if address is not None:
+            self.address = address
+        if registered_by is not None:
+            self.registered_by = registered_by
 
     def to_dict(self):
         """Return patient data with treatment entries."""
@@ -89,6 +124,31 @@ class TreatmentEntry(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    def __init__(self, patient_id=None, date_of_treatment=None, consultation_number=None, medicine=None,
+                 treatment_name=None, remark=None, next_consultation=None, payment=None,
+                 payment_method=None, created_by=None, **kwargs):
+        super().__init__(**kwargs)
+        if patient_id is not None:
+            self.patient_id = patient_id
+        if date_of_treatment is not None:
+            self.date_of_treatment = date_of_treatment
+        if consultation_number is not None:
+            self.consultation_number = consultation_number
+        if medicine is not None:
+            self.medicine = medicine
+        if treatment_name is not None:
+            self.treatment_name = treatment_name
+        if remark is not None:
+            self.remark = remark
+        if next_consultation is not None:
+            self.next_consultation = next_consultation
+        if payment is not None:
+            self.payment = payment
+        if payment_method is not None:
+            self.payment_method = payment_method
+        if created_by is not None:
+            self.created_by = created_by
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -125,6 +185,24 @@ class ApprovalRequest(db.Model):
     requester = db.relationship('User', foreign_keys=[requested_by], backref='approval_requests_made')
     reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='approval_requests_reviewed')
 
+    def __init__(self, requested_by=None, action_type=None, target_type=None, target_id=None,
+                 proposed_changes=None, status='PENDING', reviewed_by=None, **kwargs):
+        super().__init__(**kwargs)
+        if requested_by is not None:
+            self.requested_by = requested_by
+        if action_type is not None:
+            self.action_type = action_type
+        if target_type is not None:
+            self.target_type = target_type
+        if target_id is not None:
+            self.target_id = target_id
+        if proposed_changes is not None:
+            self.proposed_changes = proposed_changes
+        if status is not None:
+            self.status = status
+        if reviewed_by is not None:
+            self.reviewed_by = reviewed_by
+
     def to_dict(self):
         changes = None
         if self.proposed_changes:
@@ -158,6 +236,17 @@ class AuditLog(db.Model):
     detail = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(45), nullable=True)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def __init__(self, user_id=None, action=None, detail=None, ip_address=None, **kwargs):
+        super().__init__(**kwargs)
+        if user_id is not None:
+            self.user_id = user_id
+        if action is not None:
+            self.action = action
+        if detail is not None:
+            self.detail = detail
+        if ip_address is not None:
+            self.ip_address = ip_address
 
     def to_dict(self):
         return {
