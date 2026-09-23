@@ -5,4 +5,4 @@ description = "Clinic EMR & Management System"
 requires-python = ">=3.10"
 
 [tool.vercel]
-entrypoint = "run:app"
+entrypoint = "app:app"
