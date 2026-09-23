@@ -13,7 +13,6 @@ def create_app():
     # Resolve paths
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     frontend_dir = os.path.join(base_dir, 'frontend')
-    upload_dir = os.path.join(base_dir, 'uploads')
 
     app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
     app.config.from_object(Config)
@@ -22,12 +21,22 @@ def create_app():
     CORS(app)
     db.init_app(app)
 
-    # Ensure upload directories exist
-    os.makedirs(os.path.join(upload_dir, 'patients'), exist_ok=True)
+    upload_dir = app.config.get('UPLOAD_FOLDER', os.path.join(base_dir, 'uploads'))
 
-    # Create tables on first request (dev convenience)
+    # Ensure upload directories exist (fallback to /tmp if read-only)
+    try:
+        os.makedirs(os.path.join(upload_dir, 'patients'), exist_ok=True)
+    except OSError:
+        upload_dir = os.path.join('/tmp', 'uploads')
+        app.config['UPLOAD_FOLDER'] = upload_dir
+        os.makedirs(os.path.join(upload_dir, 'patients'), exist_ok=True)
+
+    # Create tables if needed
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception:
+            pass
 
     # ── Register API blueprints ──────────────────────────────────────────
     from .auth import auth_bp

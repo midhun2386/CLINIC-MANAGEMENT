@@ -1,0 +1,8 @@
+[project]
+name = "clinic-management"
+version = "0.1.0"
+description = "Clinic EMR & Management System"
+requires-python = ">=3.10"
+
+[tool.vercel]
+entrypoint = "run:app"
